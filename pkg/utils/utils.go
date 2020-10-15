@@ -17,9 +17,10 @@ import (
 	"github.com/golang/glog"
 	dputils "github.com/intel/sriov-network-device-plugin/pkg/utils"
 	"github.com/jaypipes/ghw"
-	sriovnetworkv1 "github.com/openshift/sriov-network-operator/pkg/apis/sriovnetwork/v1"
 	"github.com/vishvananda/netlink"
 	"k8s.io/apimachinery/pkg/util/wait"
+
+	sriovnetworkv1 "github.com/openshift/sriov-network-operator/api/v1"
 )
 
 const (
@@ -593,4 +594,18 @@ func generateRandomGuid() net.HardwareAddr {
 	}
 
 	return guid
+}
+
+// GetWatchNamespace returns the Namespace the operator should be watching for changes
+func GetWatchNamespace() (string, error) {
+	// WatchNamespaceEnvVar is the constant for env variable WATCH_NAMESPACE
+	// which specifies the Namespace to watch.
+	// An empty value means the operator is running with cluster scope.
+	var watchNamespaceEnvVar = "WATCH_NAMESPACE"
+
+	ns, found := os.LookupEnv(watchNamespaceEnvVar)
+	if !found {
+		return "", fmt.Errorf("%s must be set", watchNamespaceEnvVar)
+	}
+	return ns, nil
 }
